@@ -1,25 +1,27 @@
-#!/usr/local/Cellar/python3/3.5.2_3/bin/python3
+#!/usr/local/bin/python3
 '''
 Created on Jan 25, 2013
-
 @author: crowejohn20
 '''
-
-
 import sys, random, time, pygame, pygame.mixer, math
 from pygame.locals import *
 from tools import *
 
-class player(object):
-    def __init__(self):
+TITLE = 'Distance Demo'
+W,H = (600,600)
+FPS = 60
 
-        iSize_x = 25        # Length of squares x
-        iSize_y = 25        # Length of squares y
-        iCen_x = iSize_x/2  # Find the middle of length x
-        iCen_y = iSize_y/2  # Find the middle of length y
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        #pygame.sprite.Sprite.__init__(self)
+
+        iSize_x = 25
+        iSize_y = 25
+        iCen_x = iSize_x/2
+        iCen_y = iSize_y/2
 
         self.iSpeed = 5
-        self.tPlayer_obj = pygame.Rect(h/2,w/2,iSize_x,iSize_y)
+        self.tPlayer_obj = pygame.Rect(H/2,W/2,iSize_x,iSize_y)
         self.tPlayer_cen = iCen_x,iCen_y
 
     def update_player(self,event):
@@ -39,7 +41,7 @@ class player(object):
     def draw_player(self):
         pygame.draw.rect(screen,get_colours('Purple'),(self.tPlayer_obj),0)
 
-class goal(object):
+class Goal(object):
     def __init__(self):
 
         iNum_objs = 4
@@ -47,8 +49,8 @@ class goal(object):
 
         for objs in range(iNum_objs):
 
-            obj_pos_x = random.randint(10, w - 10)
-            obj_pos_y = random.randint(10, h - 10)
+            obj_pos_x = random.randint(10, W - 10)
+            obj_pos_y = random.randint(10, H - 10)
             obj_size_x = random.randrange(5,25,5)
             obj_size_y = obj_size_x
 
@@ -61,8 +63,8 @@ class goal(object):
         obj_x = (self.lScreen_objs[index][2]) # Get the obj size and shape so not to draw of screen
         obj_y = (self.lScreen_objs[index][3])
 
-        self.lScreen_objs[index][0] = random.randint(obj_x, w - obj_x) # Giving a new position on the index x value
-        self.lScreen_objs[index][1] = random.randint(obj_y, w - obj_y) # Giving a new position on the index y value
+        self.lScreen_objs[index][0] = random.randint(obj_x, W - obj_x) # Giving a new position on the index x value
+        self.lScreen_objs[index][1] = random.randint(obj_y, W - obj_y) # Giving a new position on the index y value
 
 
     def draw_obj(self):
@@ -71,6 +73,9 @@ class goal(object):
             if check_collision(obj):
                 new_goal.update(num)
             pygame.draw.rect(screen,get_colours('Red'),(obj))
+
+class Hud(object):
+    ''' '''
 
 def get_distance(obj,player):
 
@@ -93,34 +98,39 @@ def check_collision(obj):
 def Hud():
     ''' '''
 
-# Main Program
-title = 'Distance Demo'
+# Initialize pygame and create window
 pygame.init()
-w,h = (600,600)
-screen = pygame.display.set_mode((h,w))
-screen_center = (h/2,w/2)
+pygame.mixer.init()
+
+screen = pygame.display.set_mode((H,W))
+screen_center = (H/2,W/2)
 font1 = pygame.font.Font(None,24)
 pygame.mouse.set_visible(True)
-FPS = 60
 framerate = pygame.time.Clock()
 
 count = 0
 score = 0
 
-new_player = player()
-new_goal = goal()
+#all_sprites = pygame.sprite.Group()
+new_player = Player()
+new_goal = Goal()
 
+#all_sprites.add(player)
+#all_sprites.add(new_goal)
 
-# Repeating event loop
+# Start the main game loop
 while True:
+    # Adding framerate to Window title bar
+    pygame.display.set_caption(TITLE + " - %d Fps" % framerate.get_fps())
+    # Set the frame rate
+    framerate.tick(FPS)
+    # Grab the game ticks then convert from milliseconds to seconds
+    seconds = pygame.time.get_ticks() / 1000
+    # Fill the screen black to wipe before we update
+    screen.fill(get_colours('Black'))
 
-    framerate.tick(FPS)                                                   # setting the frame rate
-    milliseconds = pygame.time.get_ticks()                                # grabbing game ticks
-    seconds = milliseconds / 1000                                         # changing to seconds
-    pygame.display.set_caption(title+ " - %d Fps" % framerate.get_fps()) # Adding frame rate to window bar
-    screen.fill(get_colours('Black'))                                     # Flash black to wipe the screen before update with below code.
+
     keys = pygame.key.get_pressed()
-
     new_player.update_player(keys)
     new_player.draw_player()
     new_goal.draw_obj()
